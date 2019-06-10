@@ -1,0 +1,260 @@
+
+
+
+
+
+
+
+
+/***********************************************************************************************/
+// well worked program
+void PWM1A_vidInit(u8 prescall, u8 generation_mode,u16 top_value)
+// {1,3,4 + 10,11 (top)} for phase PWM
+// {5,6,7 + 14,15 (top) } for fast pwm
+// {8,9 (top) } for phase and freq pwm
+{
+	DIO_vidSetPinDirection(D,5,1);
+	PWM1A.generation_mode = generation_mode;
+	PWM1A.top_value = top_value;
+	TCCR1A |= (2<<6) | (generation_mode & 3);
+	TCCR1B |= ((generation_mode & 12)<<1) | (prescall) ;
+}
+//______________________________________/
+void PWM1A_vidStart(u8 duty)
+{
+	// {1,3,4 + 10,11 (top)} for phase PWM
+	// {5,6,7 + 14,15 (top) } for fast pwm
+	// {8,9 (top) } for phase and freq pwm
+	// select duty cycle
+	switch (PWM1A.generation_mode)
+	{
+	// phase 8-bit
+	case 1:
+		OCR1A = ( (f32)256 * duty)/100;
+		break;
+	// phase 9-bit
+	case 2:
+		OCR1A = ( (f32)512 * duty)/100;
+		break;
+	//phase 10-bit
+	case 3:
+		OCR1A = ( (f32)1024 * duty)/100;
+		break;
+
+	// fast 8-bit
+	case 5:
+		OCR1A = ( (f32)256 * duty)/100;
+		break;
+	// fast 9-bit
+	case 6:
+		OCR1A = ( (f32)512 * duty)/100;
+		break;
+	// fast 10-bit
+	case 7:
+		OCR1A = ( (f32)1024 * duty)/100;
+		break;
+
+	// phase and freq ICR1 is top
+	case 8:
+		ICR1=PWM1A.top_value;
+		OCR1A = ( (f32)ICR1 * duty)/100;
+		break;
+	// phase and freq OCR1B is top
+	case 9:
+		OCR1B=PWM1A.top_value;
+		OCR1A = ( (f32)OCR1B * duty)/100;
+		break;
+
+	// phase ICR is top
+	case 10:
+		ICR1=PWM1A.top_value;
+		OCR1A = ( (f32)ICR1 * duty)/100;
+		break;
+	// phase OCR1B is top
+	case 11:
+		OCR1B=PWM1A.top_value;
+		OCR1A = ( (f32)OCR1B * duty)/100;
+		break;
+	// fast ICR is top
+	case 14:
+		ICR1=PWM1A.top_value;
+		OCR1A = ( (f32)ICR1 * duty)/100;
+		break;
+	// faast OCR1B is top
+	case 15:///////////////////////////////////// problem does not work /////////////
+		OCR1B=PWM1A.top_value;
+		OCR1A = ( (f32)OCR1B * duty)/100;
+		break;
+	default:
+		break;
+	}
+}
+//______________________________________/
+
+
+void PWM1B_vidInit(u8 prescall, u8 generation_mode,u16 top_value)
+// {1,3,4 + 10,11 (top)} for phase PWM
+// {5,6,7 + 14,15 (top) } for fast pwm
+// {8,9 (top) } for phase and freq pwm
+{
+	DIO_vidSetPinDirection(D,4,1);
+	PWM1B.generation_mode = generation_mode;
+	PWM1B.top_value = top_value;
+	TCCR1A |= (2<<4) | (generation_mode & 3);
+	TCCR1B |= ((generation_mode & 12)<<1) | (prescall) ;
+}
+/____________________________________________________________________/
+void PWM1B_vidStart(u8 duty)
+{
+	// select duty cycle
+	switch (PWM1B.generation_mode)
+	{
+	// phase 8-bit
+	case 1:
+		OCR1B = ( (f32)256 * duty)/100;
+		break;
+	// phase 9-bit
+	case 2:
+		OCR1B = ( (f32)512 * duty)/100;
+		break;
+	//phase 10-bit
+	case 3:
+		OCR1B = ( (f32)1024 * duty)/100;
+		break;
+
+	// fast 8-bit
+	case 5:
+		OCR1B = ( (f32)256 * duty)/100;
+		break;
+	// fast 9-bit
+	case 6:
+		OCR1B = ( (f32)512 * duty)/100;
+		break;
+	// fast 10-bit
+	case 7:
+		OCR1B = ( (f32)1024 * duty)/100;
+		break;
+
+	// phase and freq ICR1 is top
+	case 8:
+		ICR1=PWM1B.top_value;
+		OCR1B = ( (f32)ICR1 * duty)/100;
+		break;
+	// phase and freq OCR1B is top
+	case 9:
+		OCR1A=PWM1B.top_value;
+		OCR1B = ( (f32)OCR1B * duty)/100;
+		break;
+
+	// phase ICR is top
+	case 10:
+		ICR1=PWM1B.top_value;
+		OCR1B = ( (f32)ICR1 * duty)/100;
+		break;
+	// phase OCR1B is top
+	case 11://////////////////////////////////////////////// there are a problem here ## program dont work ##
+		OCR1A=PWM1B.top_value;
+		OCR1B = ( (f32)OCR1B * duty)/100;
+		break;
+	// fast ICR is top
+	case 14:
+		ICR1=PWM1B.top_value;
+		OCR1B = ( (f32)ICR1 * duty)/100;
+		break;
+	// faast OCR1B is top
+	case 15:
+		OCR1A=PWM1B.top_value;
+		OCR1B = ( (f32)OCR1B * duty)/100;
+		break;
+	}
+}
+
+/***********************************************************************************************/
+void PWM1_vidStop(void)
+{
+	TCCR1A=0;
+	TCCR1B=0;
+	OCR1A=0;
+	OCR1B=0;
+	ICR1=0;
+}
+/***********************************************************************************************/
+
+//______________________________________/
+void PWM1B_vidInit(u8 prescall, u8 generation_mode,u16 top_value)
+// {1,3,4 + 10,11 (top)} for phase PWM
+// {5,6,7 + 14,15 (top) } for fast pwm
+// {8,9 (top) } for phase and freq pwm
+{
+	DIO_vidSetPinDirection(D,4,1);
+	PWM1B.generation_mode = generation_mode;
+	PWM1B.top_value = top_value;
+	TCCR1A |= (2<<4) | (generation_mode & 3);
+	TCCR1B |= ((generation_mode & 12)<<1) | (prescall) ;
+}
+/***********************************************************************************************/
+void PWM1B_vidStart(u8 duty)
+{
+	// select duty cycle
+	switch (PWM1B.generation_mode)
+	{
+	// phase 8-bit
+	case 1:
+		OCR1B = ( (f32)256 * duty)/100;
+		break;
+	// phase 9-bit
+	case 2:
+		OCR1B = ( (f32)512 * duty)/100;
+		break;
+	//phase 10-bit
+	case 3:
+		OCR1B = ( (f32)1024 * duty)/100;
+		break;
+
+	// fast 8-bit
+	case 5:
+		OCR1B = ( (f32)256 * duty)/100;
+		break;
+	// fast 9-bit
+	case 6:
+		OCR1B = ( (f32)512 * duty)/100;
+		break;
+	// fast 10-bit
+	case 7:
+		OCR1B = ( (f32)1024 * duty)/100;
+		break;
+
+	// phase and freq ICR1 is top
+	case 8://
+		ICR1=PWM1B.top_value;
+		OCR1B = ( (f32)ICR1 * duty)/100;
+		break;
+	// phase and freq OCR1B is top
+	case 9://
+		OCR1A=PWM1B.top_value;
+		OCR1B = ( (f32)OCR1B * duty)/100;
+		break;
+
+	// phase ICR is top
+	case 10://
+		ICR1=PWM1B.top_value;
+		OCR1B = ( (f32)ICR1 * duty)/100;
+		break;
+	// phase OCR1B is top
+	case 11://////////////////////////////////////////////// there are a problem here ## program dont work ##
+		OCR1A=PWM1B.top_value;
+		OCR1B = ( (f32)OCR1B * duty)/100;
+		break;
+	// fast ICR is top
+	case 14://
+		ICR1=PWM1B.top_value;
+		OCR1B = ( (f32)ICR1 * duty)/100;
+		break;
+	// faast OCR1B is top
+	case 15://
+		OCR1A=PWM1B.top_value;
+		OCR1B = ( (f32)OCR1B * duty)/100;
+		break;
+	}
+}
+/***********************************************************************************************/
